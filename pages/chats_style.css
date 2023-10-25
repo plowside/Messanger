@@ -1,0 +1,618 @@
+@font-face {
+	font-display: swap;
+	font-family: Signifier;
+	font-style: normal;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/signifier/signifier-light.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Signifier;
+	font-style: italic;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/signifier/signifier-light-italic.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Signifier;
+	font-style: normal;
+	font-weight: 700;
+	src: url(https://cdn.openai.com/common/fonts/signifier/signifier-bold.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Signifier;
+	font-style: italic;
+	font-weight: 700;
+	src: url(https://cdn.openai.com/common/fonts/signifier/signifier-bold-italic.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne;
+	font-style: normal;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-buch.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne;
+	font-style: italic;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-buch-kursiv.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne;
+	font-style: normal;
+	font-weight: 500;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-kraftig.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne;
+	font-style: italic;
+	font-weight: 500;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-kraftig-kursiv.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne;
+	font-style: normal;
+	font-weight: 600;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-halbfett.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne;
+	font-style: italic;
+	font-weight: 600;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-halbfett-kursiv.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne Mono;
+	font-style: normal;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-mono-buch.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne Mono;
+	font-style: normal;
+	font-weight: 700;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-mono-halbfett.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne Mono;
+	font-style: italic;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/soehne/soehne-mono-buch-kursiv.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne Circle;
+	font-style: normal;
+	font-weight: 400;
+	src: url(https://cdn.openai.com/common/fonts/soehne-circle/soehne-circle-buch.woff2) format("woff2")
+}
+
+@font-face {
+	font-display: swap;
+	font-family: Söhne Circle;
+	font-style: normal;
+	font-weight: 600;
+	src: url(https://cdn.openai.com/common/fonts/soehne-circle/soehne-circle-halbfett.woff2) format("woff2")
+}
+
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: Söhne,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Helvetica Neue,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+}
+
+
+body {
+	background: #111;
+	color: #FFF;
+}
+
+.container {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	justify-content: flex-start;
+}
+
+.container .profiles-side {
+	height: 100vh;
+	width: 30%;
+	background: #111;
+	display: flex;
+	flex-direction: column;
+}
+
+.container .profiles-side .profile-nav {
+	padding: 5px 10px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	background-color: #111;
+}
+
+.container .profiles-side .profile-nav .profile-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-self: flex-start;
+}
+
+.container .profiles-side .profile-nav .profile-container .profile-img {
+	width: 40px;
+	height: 40px;
+	margin: 0px 5px 0px 5px;
+	background: #111;
+	border-radius: 50%;
+	text-align: center;
+	font-size: 30px;
+	cursor: pointer;
+}
+
+.container .profiles-side .profile-nav .profile-container .profile-name {
+	white-space: nowrap;
+	overflow-x: hidden;
+	cursor: pointer;
+}
+
+.container .profiles-side .profile-nav .profile-buttons-group {
+	align-self: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.container .profiles-side .profile-nav .profile-buttons-group a {
+	text-decoration: none;
+	color: #dddddd;
+	margin: 0px 10px 0px 10px;
+	cursor: pointer;
+}
+
+.container .profiles-side .search-box-group {
+	display: flex;
+	flex-direction: row;
+	padding: 10px;
+	border: 1px solid #111;
+}
+
+.container .profiles-side .search-box-group i.bi.bi-search {
+	font-size: 15px;
+	padding: 5px 15px;
+}
+
+.container .profiles-side .search-box-group .search-contact {
+	border: none;
+	outline: none;
+	background-color: #111;
+	color: #FFF;
+	flex-grow: 1;
+}
+
+.container .profiles-side .recent-chats {
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+}
+
+/*.container .profiles-side .recent-chats::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: rgba(219, 219, 219, 0.3);
+	border-radius: 10px;
+}*/
+
+.container .profiles-side .recent-chats::-webkit-scrollbar {
+	width: 7px;
+	background-color: #333;
+	border-radius: 10px;
+}
+
+.container .profiles-side .recent-chats::-webkit-scrollbar-thumb {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: rgba(219, 219, 219, 0.3);
+	border-radius: 10px;
+}
+
+.container .profiles-side .recent-chats .chat {
+	padding: 10px 10px;
+	display: flex;
+	flex-direction: row;
+	cursor: pointer;
+	border-bottom: 1px solid #222;
+	transition: all 0.5s ease-in-out;
+}
+
+.container .profiles-side .recent-chats .chat.active {
+	background-color: #222;
+	transition: all 0.5s ease-in-out;
+}
+
+.container .profiles-side .recent-chats .chat .contact-img {
+	width: 40px;
+	height: 40px;
+	margin: 0px 10px 0px 5px;
+	background: #111;
+	border-radius: 50%;
+	text-align: center;
+	font-size: 30px;
+}
+
+.container .profiles-side .recent-chats .chat .contact-recent-message {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	flex-grow: 1;
+}
+
+.container .profiles-side .recent-chats .chat .contact-recent-message .contact-name {
+	font-size: 16px;
+	overflow-x: hidden;
+}
+
+.container .profiles-side .recent-chats .chat .contact-recent-message .recent-message {
+	font-size: 13px;
+}
+
+.container .profiles-side .recent-chats .chat .contact-message-status {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-content: space-around;
+	text-align: end;
+}
+
+.container .profiles-side .recent-chats .chat .contact-message-status .recent-message-time {
+	font-size: 13px;
+}
+
+.container .profiles-side .recent-chats .chat .contact-message-status .contact-setting-status {
+	font-size: 15px;
+}
+
+.container .content-side {
+	height: 100vh;
+	width: 70%;
+	background: #111;
+}
+
+.container .content-side .chat-area {
+	width: 100%;
+	height: 100%;
+	display: none;
+}
+
+.container .content-side .chat-area.active {
+	display: flex;
+	flex-direction: column;
+}
+
+.container .content-side .chat-area .chat-nav {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 5px 10px;
+	background-color: #111;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-self: flex-start;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-container .chat-back-button {
+	display: block !important;
+	color: #FFF;
+	margin: 0px 5px 0px 5px;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-container .chat-profile-img {
+	width: 40px;
+	height: 40px;
+	margin: 0px 5px 0px 5px;
+	background: #111;
+	border-radius: 50%;
+	text-align: center;
+	font-size: 30px;
+	cursor: pointer;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-container .chat-profile-details h3.chat-profile-name {
+	font-size: 18px;
+	white-space: nowrap;
+	overflow-x: hidden;
+	cursor: pointer;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-container .chat-profile-details p.chat-profile-status {
+	font-size: 14px;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-buttons-group {
+	align-self: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.container .content-side .chat-area .chat-nav .chat-profile-buttons-group a {
+	text-decoration: none;
+	color: #dddddd;
+	margin: 0px 10px 0px 10px;
+	cursor: pointer;
+}
+
+.container .content-side .chat-area .chat-container {
+	flex-grow: 1;
+	background-color: #222;
+	border-radius: 10px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+/*.container .content-side .chat-area .chat-container::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: rgba(219, 219, 219, 0.3);
+	border-radius: 10px;
+}*/
+
+.container .content-side .chat-area .chat-container::-webkit-scrollbar {
+	width: 7px;
+	background-color: #333;
+	border-radius: 10px;
+}
+
+.container .content-side .chat-area .chat-container::-webkit-scrollbar-thumb {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: rgba(219, 219, 219, 0.3);
+	border-radius: 10px;
+}
+
+
+.container .content-side .chat-area .chat-container .popup-rtl {
+	align-self: flex-start;
+	display: flex;
+	flex-direction: column;
+	margin: 2px 5px 2px 20px;
+	float: left;
+	width: auto;
+	max-width: 50%;
+	background: #111;
+	padding: 10px;
+	border-radius: 6px;
+	color: black;
+	position: relative;
+	font-size: 12px;
+	line-height: 20px;
+}
+
+.container .content-side .chat-area .chat-container .popup-rtl.primary-message {
+	margin: 10px 5px 2px 20px;
+	border-radius: 10px;
+}
+
+.container .content-side .chat-area .chat-container .popup-rtl.primary-message::before {
+	content: "";
+	display: block;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-right: 10px solid #111;
+	position: absolute;
+	top: 16px;
+	left: -10px;
+}
+
+.container .content-side .chat-area .chat-container .popup-rtl .chatter-name {
+	font-size: 15px;
+	font-weight: bold;
+	text-decoration: none;
+	color: purple;
+}
+
+.container .content-side .chat-area .chat-container .popup-rtl p.chat-text {
+	font-size: 15px;
+	line-height: 18px;
+	word-spacing: 3px;
+	color: #FFF;
+}
+
+.container .content-side .chat-area .chat-container .popup-rtl p.chat-text .chat-time-status {
+	float: right;
+	font-size: 11px;
+	color: #FFF;
+	padding: 0px 10px;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr {
+	align-self: flex-end;
+	display: flex;
+	flex-direction: column;
+	margin: 2px 20px 2px 5px;
+	float: right;
+	width: auto;
+	max-width: 50%;
+	background: #666;
+	padding: 10px;
+	border-radius: 6px;
+	color: black;
+	position: relative;
+	font-size: 12px;
+	line-height: 20px;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr.primary-message {
+	margin: 10px 20px 2px 5px;
+	border-radius: 10px;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr.primary-message::before {
+	content: "";
+	display: block;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-left: 10px solid #666;
+	position: absolute;
+	top: 16px;
+	right: -10px;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr .chatter-name {
+	font-size: 15px;
+	font-weight: bold;
+	text-decoration: none;
+	color: seagreen;
+	text-align: right;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr p.chat-text {
+	font-size: 15px;
+	line-height: 23px;
+	word-spacing: 3px;
+	color: #FFF;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr p.chat-text .chat-time-status {
+	float: right;
+	padding: 2px 5px;
+	font-size: 11px;
+	color: #FFF;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr p.chat-text .chat-time-status i.bi.bi-check-all.viewed {
+	font-size: 15px;
+	color: #1070ff;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr p.chat-text .chat-time-status i.bi.bi-check-all.received {
+	font-size: 15px;
+	color: #808080;
+}
+
+.container .content-side .chat-area .chat-container .popup-ltr p.chat-text .chat-time-status i.bi.bi-check {
+	font-size: 15px;
+	color: #808080;
+}
+
+.container .content-side .chat-area .chat-container .chat-information-popup {
+	align-self: center;
+	margin: 10px;
+	padding: 5px 10px;
+	font-size: 12px;
+	background-color: #111;
+	color: #FFF;
+	border-radius: 15px;
+}
+
+.container .content-side .chat-area .chat-input-box-group {
+	justify-self: flex-end;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-content: center;
+	background-color: #111;
+	padding: 10px;
+}
+
+.container .content-side .chat-area .chat-input-box-group a.smile-keyboard-button {
+	text-decoration: none;
+	color: #dddddd;
+	cursor: pointer;
+	font-size: 18px;
+	padding: 5px 5px 5px 15px;
+}
+
+.container .content-side .chat-area .chat-input-box-group .chat-input {
+	border: none;
+	outline: none;
+	flex-grow: 1;
+	color: #FFF;
+	background-color: #111;
+	margin: 0px 20px;
+	padding: 5px 10px;
+}
+
+.container .content-side .chat-area .chat-input-box-group a.mic-input-button {
+	text-decoration: none;
+	color: #dddddd;
+	cursor: pointer;
+	padding: 5px 15px 5px 5px;
+}
+
+.container .content-side .blank-page {
+	width: 100%;
+	height: 100%;
+	display: none;
+}
+
+.container .content-side .blank-page.active {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.container .content-side .blank-page h1 {
+	text-align: center;
+}
+
+@media (max-width: 940px) {
+	.container .profiles-side {
+		display: none;
+		width: 100%;
+	}
+
+	.container .profiles-side.active {
+		display: flex;
+		width: 100%;
+	}
+
+	.container .content-side {
+		display: none;
+		width: 100%;
+	}
+
+	.container .content-side.active {
+		display: flex;
+		width: 100%;
+	}
+
+	.container .content-side .chat-area {
+		display: none;
+	}
+
+	.container .content-side .chat-area.active {
+		display: flex;
+		flex-direction: column;
+	}
+}
