@@ -47,7 +47,7 @@
     </div>
     <script>
         var client_id = Date.now();
-        var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+        var ws = new WebSocket(`ws://${location.href}/ws/${client_id}`);
         var messageList = document.getElementById('message-list');
         var messageInput = document.getElementById('message-input');
 
