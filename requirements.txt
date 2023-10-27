@@ -1,3 +1,7 @@
-fastapi
-uvicorn
+mysqlclient
 pydantic
+uvicorn
+fastapi
+passlib
+python-jose
+starlette
