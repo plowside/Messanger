@@ -228,6 +228,9 @@
 				overflow-y: auto;
 			}
 
+
+
+
 			/*.container .profiles-side .recent-chats::-webkit-scrollbar-track {
 				-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 				background-color: rgba(219, 219, 219, 0.3);
@@ -236,13 +239,13 @@
 
 			.container .profiles-side .recent-chats::-webkit-scrollbar {
 				width: 7px;
-				background-color: #333;
+				background-color: #333; /* #303338 */
 				border-radius: 10px;
 			}
 
 			.container .profiles-side .recent-chats::-webkit-scrollbar-thumb {
 				-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-				background-color: rgba(219, 219, 219, 0.3);
+				background-color: rgba(219, 219, 219, 0.3);  /* #737579 */
 				border-radius: 10px;
 			}
 
@@ -252,12 +255,12 @@
 				flex-direction: row;
 				cursor: pointer;
 				border-bottom: 1px solid #222;
-				transition: all 0.5s ease-in-out;
+				transition: all 0.2s ease-in-out;
 			}
 
 			.container .profiles-side .recent-chats .chat.active {
 				background-color: #222;
-				transition: all 0.5s ease-in-out;
+				transition: all 0.2s ease-in-out;
 			}
 
 			.container .profiles-side .recent-chats .chat .contact-img {
@@ -426,19 +429,6 @@
 				border-radius: 10px;
 			}
 
-			.container .content-side .chat-area .chat-container .popup-rtl.primary-message::before {
-				content: "";
-				display: block;
-				width: 0;
-				height: 0;
-				border-top: 10px solid transparent;
-				border-bottom: 10px solid transparent;
-				border-right: 10px solid #111;
-				position: absolute;
-				top: 16px;
-				left: -10px;
-			}
-
 			.container .content-side .chat-area .chat-container .popup-rtl .chatter-name {
 				font-size: 15px;
 				font-weight: bold;
@@ -482,18 +472,7 @@
 				border-radius: 10px;
 			}
 
-			.container .content-side .chat-area .chat-container .popup-ltr.primary-message::before {
-				content: "";
-				display: block;
-				width: 0;
-				height: 0;
-				border-top: 10px solid transparent;
-				border-bottom: 10px solid transparent;
-				border-left: 10px solid #666;
-				position: absolute;
-				top: 16px;
-				right: -10px;
-			}
+
 
 			.container .content-side .chat-area .chat-container .popup-ltr .chatter-name {
 				font-size: 15px;
@@ -591,8 +570,11 @@
 				align-items: center;
 			}
 
-			.container .content-side .blank-page h1 {
-				text-align: center;
+			.container .content-side .blank-page p {
+				color: #e8ebee;
+				background-color: rgba(219, 219, 219, 0.3);
+				border-radius: 100px;
+				padding: 3px 13px;
 			}
 
 			@media (max-width: 940px) {
@@ -688,114 +670,7 @@
 					</nav>
 					<!-- Chat container -->
 					<div class="chat-container">
-						<div class="popup-rtl primary-message">
-							<!-- <a href="#" class="chatter-name">Nigger.</a> !-->
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut,
-								sed perferendis dolorum nisi ipsa error rem magni nostrum
-								commodi voluptatem accusamus, dolores mollitia cupiditate
-								voluptatum, voluptate laboriosam deserunt omnis. Atque explicabo
-								laborum iusto, possimus rerum aperiam facere sequi dicta libero
-								laudantium distinctio excepturi quis magni reprehenderit enim
-								debitis magnam consequuntur?
-								<span class="chat-time-status">6:30PM</span>
-							</p>
-						</div>
-						<div class="popup-rtl">
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet.
-								<span class="chat-time-status">6:30PM</span>
-							</p>
-						</div>
-						<div class="popup-rtl">
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit.
-								<span class="chat-time-status">6:30PM</span>
-							</p>
-						</div>
-						<div class="chat-information-popup">
-							<p class="chat-information-text">Собеседник сделал скриншот</p>
-						</div>
-						<div class="popup-ltr primary-message">
-							<!-- <a href="#" class="chatter-name">Not Nigger.</a> !-->
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut,
-								sed perferendis dolorum nisi ipsa error rem magni nostrum
-								commodi voluptatem accusamus, dolores mollitia cupiditate
-								voluptatum, voluptate laboriosam deserunt omnis. Atque explicabo
-								laborum iusto, possimus rerum aperiam facere sequi dicta libero
-								laudantium distinctio excepturi quis magni reprehenderit enim
-								debitis magnam consequuntur?
-								<span class="chat-time-status">6:30PM <i class="bi bi-check-all viewed"></i> </span>
-							</p>
-						</div>
-						<div class="popup-ltr">
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit.
-								<span class="chat-time-status">6:30PM <i class="bi bi-check-all viewed"></i></span>
-							</p>
-						</div>
-						<div class="popup-ltr">
-							<p class="chat-text">
-								Lorem ipsum dolor sit<span class="chat-time-status"
-									>6:30PM <i class="bi bi-check-all viewed"></i></span
-									>
-							</p>
-						</div>
-						<div class="popup-rtl primary-message">
-							<!-- <a href="#" class="chatter-name">Nigger.</a> !-->
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut,
-								sed perferendis dolorum nisi ipsa error rem magni nostrum
-								commodi voluptatem accusamus, dolores mollitia cupiditate
-								voluptatum, voluptate laboriosam deserunt omnis. Atque explicabo
-								laborum iusto, possimus rerum aperiam facere sequi dicta libero
-								laudantium distinctio excepturi quis magni reprehenderit enim
-								debitis magnam consequuntur?
-								<span class="chat-time-status">6:30PM </span>
-							</p>
-						</div>
-						<div class="popup-rtl">
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet.
-								<span class="chat-time-status">6:30PM </span>
-							</p>
-						</div>
-						<div class="popup-rtl">
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit.
-								<span class="chat-time-status">6:30PM</span>
-							</p>
-						</div>
-						<div class="chat-information-popup">
-							<p class="chat-information-text">Собеседник сделал скриншот</p>
-						</div>
-						<div class="popup-ltr primary-message">
-							<!-- <a href="#" class="chatter-name">Not Nigger.</a> !-->
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut,
-								sed perferendis dolorum nisi ipsa error rem magni nostrum
-								commodi voluptatem accusamus, dolores mollitia cupiditate
-								voluptatum, voluptate laboriosam deserunt omnis. Atque explicabo
-								laborum iusto, possimus rerum aperiam facere sequi dicta libero
-								laudantium distinctio excepturi quis magni reprehenderit enim
-								debitis magnam consequuntur?
-								<span class="chat-time-status">6:30PM <i class="bi bi-check-all received"></i></span>
-							</p>
-						</div>
-						<div class="popup-ltr">
-							<p class="chat-text">
-								Lorem ipsum dolor sit amet consectetur adipisicing elit.
-								<span class="chat-time-status">6:30PM <i class="bi bi-check-all received"></i></span>
-							</p>
-						</div>
-						<div class="popup-ltr">
-							<p class="chat-text">
-								Lorem ipsum dolor sit<span class="chat-time-status"
-									>6:30PM <i class="bi bi-check"></i></span
-									>
-							</p>
-						</div>
+
 					</div>
 					<!-- Chat input box -->
 					<div class="chat-input-box-group">
@@ -807,7 +682,7 @@
 							name="chat-input"
 							id="chat-input"
 							class="chat-input"
-							placeholder="Let's start chat"
+							placeholder="Написать сообщение..."
 							/>
 						<a href="#" class="mic-input-button">
 						<i class="bi bi-mic"></i>
@@ -816,14 +691,19 @@
 				</div>
 				<!-- Empty Screen -->
 				<div class="blank-page active" id="blank-page" >
-					<h1>
+					<!--<h1>
 						<i class="bi bi-chat-square-text"></i>
-					</h1>
-					<p>Start chat with your known person...</p>
+					</h1> -->
+					<p>Выберите, кому хотели бы написать</p>
 				</div>
 			</div>
 		</div>
+		<script src="https://cdn.jsdelivr.net/npm/transliteration@2.1.8/dist/browser/bundle.umd.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+
 		<script type="text/javascript">
+
+
 			var chat_container = document.getElementsByClassName('chat-container')[0];
 			var content_side = document.getElementById('content-side');
 			var chat_area = document.getElementById('chat-area');
@@ -863,17 +743,18 @@
 				var chat_container = document.querySelector('.chat-container');
 
 				// Loop through the data.chats array and create elements
-				data.chats.forEach(chat => {
+				data.conversations.forEach(chat => {
 					// Create the chat element
 					var chatElement = document.createElement('div');
 					chatElement.className = `chat contact-${chat.id}`;
-					chatElement.setAttribute("user-id", chat.id);
 					chatElement.setAttribute("chat-id", chat.id);
 
 					// Create the contact image element
 					var contactImage = document.createElement('img');
 					contactImage.className = 'contact-img';
-					contactImage.src = './img/avatar.png';
+					if (chat.avatar === null) contactImage.src = './img/avatar.png';
+					else contactImage.src = `./img/${chat.id}/${chat.avatar}/avatar.png`;
+
 
 					// Create the contact recent message container
 					var recentMessageContainer = document.createElement('div');
@@ -887,7 +768,12 @@
 					// Create the recent message element
 					var recentMessage = document.createElement('p');
 					recentMessage.className = 'recent-message';
-					recentMessage.textContent = chat.last_message.text;
+					if (chat.last_message.data === null){
+						recentMessage.textContent = "Начните общаться!";
+					}
+					else {
+						recentMessage.textContent = chat.last_message.data;
+					}
 
 					// Create the contact message status container
 					var messageStatusContainer = document.createElement('div');
@@ -896,7 +782,24 @@
 					// Create the recent message time element
 					var messageTime = document.createElement('p');
 					messageTime.className = 'recent-message-time';
-					messageTime.textContent = chat.last_message.date;
+					if (chat.last_message.date === null){
+						messageTime.textContent = "";
+					}
+					else {
+						var diff = (Date.now() - (chat.last_message.date * 1000)) / 1000;
+						var date = new Date(chat.last_message.date * 1000);
+						if (diff <= 86400){
+							var hours = date.getHours().toString().padStart(2, '0');
+							var minutes = date.getMinutes().toString().padStart(2, '0');
+							messageTime.textContent = `${hours}:${minutes}`;
+						} else if (diff <= 604800) {
+							var dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+							messageTime.textContent = dayNames[date.getDay()];
+						} else {
+							messageTime.textContent = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+						}
+					}
+
 
 					// Append elements to their respective containers
 					recentMessageContainer.appendChild(contactName);
@@ -917,11 +820,20 @@
 
 					// Add a click event listener to the chat element
 					chatElement.addEventListener('click', function (e) {
-						console.log(e);
 						var chatsElement = document.querySelectorAll('.recent-chats > .chat');
 						chatsElement.forEach(function (j) {
 							j.classList.remove('active');
 						});
+
+
+
+						// Удалить все сообщения
+						var chat_container_elements = document.querySelectorAll('.chat-container > div[class^="popup"]')
+						chat_container_elements.forEach(function(popupDiv){
+							popupDiv.remove();
+						})
+
+						chat_set_messages(chatElement.getAttribute('chat-id'));
 						chatElement.classList.add('active');
 
 						var children = [].slice.call(chatElement.children);
@@ -964,6 +876,8 @@
 				})
 			}
 
+
+
 			chat_back_button.addEventListener('click', function (e) {
 				var chatsElement = document.querySelectorAll('.recent-chats > .chat');
 
@@ -983,26 +897,90 @@
 				});
 			});
 
-			chat_search_button.addEventListener('input', function (e) {
-			    var chatsElement = document.querySelectorAll('.recent-chats > .chat');
 
-			    chatsElement.forEach(chat => {
-			        var contactName = chat.querySelector('.contact-name').textContent.toLowerCase();
-			        var recentMessage = chat.querySelector('.recent-message').textContent.toLowerCase();
-			        var searchValue = chat_search_button.value.toLowerCase();
-			        
-			        if (contactName.indexOf(searchValue) >= 0 || recentMessage.indexOf(searchValue) >= 0) {
-			            // Если условие выполняется, показать элемент
-			            chat.style.display = 'flex';
-			        } else {
-			            // Если условие не выполняется, скрыть элемент
-			            chat.style.display = 'none';
-			        }
-			    });
+
+			chat_search_button.addEventListener('input', function (e) {
+				var chatsElement = document.querySelectorAll('.recent-chats > .chat');
+
+				chatsElement.forEach(chat => {
+					var cn = chat.querySelector('.contact-name').textContent.toLowerCase();
+					var rm = chat.querySelector('.recent-message').textContent.toLowerCase();
+					var cnT = transliterate(cn);
+					var rmT = transliterate(rm);
+
+					var searchValue = chat_search_button.value.toLowerCase();
+					var searchValueT = transliterate(searchValue);
+
+					if (
+						cn.includes(searchValue) ||
+						rm.includes(searchValue) ||
+						cnT.includes(searchValue) ||
+						rmT.includes(searchValue) ||
+						cn.includes(searchValueT) ||
+						rm.includes(searchValueT) ||
+						cnT.includes(searchValueT) ||
+						rmT.includes(searchValueT)
+					){
+						chat.style.display = 'flex';
+					} else {
+						chat.style.display = 'none';
+					}
+				});
 			});
 
 
 
+
+
+			function chat_set_messages(conversation_id){
+				chat_container_element = document.querySelector('.chat-container')
+
+				fetch('/api/chats?' + new URLSearchParams({
+					conversation_id: conversation_id
+				})).then(response => {
+					return response.json();
+				}).then(data => {
+					if (data.status === false){
+						return alert('pizdec');
+					}
+					data.messages.forEach(function (e){
+						var chatElement = document.createElement('div');
+						if (e.type == 'message') {
+							if (e.is_me === true) chatElement.className = "popup-ltr primary-message";
+							else chatElement.className = "popup-rtl primary-message";
+
+							var chat_text = document.createElement('p');
+							chat_text.className = "chat-text";
+							
+							chat_text.innerHTML = messageDataWithLineBreaks = e.message_data.replace(/[\r\n]/g, '<br>');
+							
+							chat_time_status = document.createElement('span');
+							chat_time_status.className = "chat-time-status";
+
+							var date = new Date(e.create_date * 1000);
+							var hours = date.getHours().toString().padStart(2, '0');
+							var minutes = date.getMinutes().toString().padStart(2, '0');
+							chat_time_status.textContent = `${hours}:${minutes}`;
+
+							chat_text.appendChild(chat_time_status);
+							
+							chatElement.appendChild(chat_text);
+						} else if (e.message_type == 'local_update') {
+							chatElement.className = "chat-information-popup";
+							var chat_information_text = document.createElement('p');
+							chat_information_text.className = "chat-information-text";
+
+							chat_information_text.innerHTML = messageDataWithLineBreaks = e.message_data.replace(/[\r\n]/g, '<br>');
+							
+							chatElement.appendChild(chat_information_text);
+						}
+
+						chat_container_element.appendChild(chatElement);
+					})
+
+
+				})
+			}
 
 
 
