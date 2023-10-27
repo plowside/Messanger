@@ -1,6 +1,6 @@
 pydantic
 uvicorn
 fastapi
-passlib
-python-jose
+passlib[bcrypt]
+python-jose[cryptography]
 starlette
