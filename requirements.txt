@@ -1,4 +1,3 @@
-mysqlclient
 pydantic
 uvicorn
 fastapi
