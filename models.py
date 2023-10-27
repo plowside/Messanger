@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Union
 
 class Token(BaseModel):
     access_token: str
@@ -6,16 +7,16 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: Union[str , None] = None
 
 
 class User(BaseModel):
     id: int
     username: str
-    email: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
-    disabled: bool | None = None
+    email: Union[str , None] = None
+    first_name: Union[str , None] = None
+    last_name: Union[str , None] = None
+    disabled: Union[bool , None] = None
 
 
 
@@ -25,8 +26,8 @@ class UserInDB(User):
 
 class UserRegister(BaseModel):
     username: str
-    first_name: str | None = None
-    last_name: str | None = None
+    first_name: Union[str , None] = None
+    last_name: Union[str , None] = None
     password: str
 
 class UserLogin(BaseModel):
@@ -36,5 +37,5 @@ class UserLogin(BaseModel):
 
 class Forgot(BaseModel):
     username: str
-    email: str | None = None
-    last_password: str | None = None
+    email: Union[str , None] = None
+    last_password: Union[str , None] = None
