@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from typing import Annotated, Union
+from typing import Annotated
 
 from models import *#UserInDB, UserRegister, TokenData, User
 
@@ -57,7 +57,7 @@ def authenticate_user(username: str, password: str):
     return user
 
 
-def create_jwt_token(data: dict, expires_delta: Union[timedelta, None] = None):
+def create_jwt_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

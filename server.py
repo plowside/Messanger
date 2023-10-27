@@ -1,7 +1,7 @@
 import uvicorn, random, time, sqlite3, json
 
 from datetime import datetime, timedelta
-from typing import Annotated, Union
+from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Response, Request, Cookie, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -32,11 +32,11 @@ async def files_img(filename):
 
 
 @app.get("/")
-async def index_(): #Authorization: Annotated[Union[str, None], Cookie()] = None
+async def index_(): #Authorization: Annotated[str | None, Cookie()] = None
     return RedirectResponse(url="/login")
 
 @app.get("/register")
-async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
+async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user_None(Authorization)
     if user:
         raise HTTPException(
@@ -47,7 +47,7 @@ async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
     return HTMLResponse(open('pages/register.html', encoding='utf-8').read())
 
 @app.get("/login")
-async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
+async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user_None(Authorization)
     if user:
         raise HTTPException(
@@ -58,7 +58,7 @@ async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
     return HTMLResponse(open('pages/login.html', encoding='utf-8').read())
 
 @app.get("/forgot")
-async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
+async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user_None(Authorization)
     if user:
         raise HTTPException(
@@ -69,7 +69,7 @@ async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
     return HTMLResponse(open('pages/forgot.html', encoding='utf-8').read())
 
 @app.get("/reset")
-async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
+async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user_None(Authorization)
     if user:
         raise HTTPException(
@@ -81,7 +81,7 @@ async def getreg(Authorization: Annotated[Union[str , None], Cookie()] = None):
 
 
 @app.get("/chats")
-async def chats(Authorization: Annotated[Union[str , None], Cookie()] = None):
+async def chats(Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user(Authorization)
     return HTMLResponse(open('pages/chats.html', encoding='utf-8').read())
 
@@ -89,7 +89,7 @@ async def chats(Authorization: Annotated[Union[str , None], Cookie()] = None):
 
 ########################################## ROUTES => CHATS #################################################
 @app.get('/api/chats')
-async def api_chats(Authorization: Annotated[Union[str , None], Cookie()] = None, conversation_id: int = None):
+async def api_chats(Authorization: Annotated[str | None, Cookie()] = None, conversation_id: int = None):
     user = await get_current_user(Authorization)
     _db = SQLiteDatabase()
     cur, con = _db._get_connection()
