@@ -6,6 +6,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
+    id: int | None = None
     username: str | None = None
 
 
@@ -15,12 +16,19 @@ class User(BaseModel):
     email: str | None = None
     first_name: str | None = None
     last_name: str | None = None
-    disabled: bool | None = None
+    registration_date: int | None = None
+    access_type: int | None = None
 
 
 
 class UserInDB(User):
+    id: int
+    username: str
+    first_name: str | None = None
+    last_name: str | None = None
     hashed_password: str
+    registration_date: int
+    access_type: int
 
 
 class UserRegister(BaseModel):
@@ -35,6 +43,13 @@ class UserLogin(BaseModel):
 
 
 class Forgot(BaseModel):
-    username: str
+    id: int | None = None
+    username: str | None = None
     email: str | None = None
     last_password: str | None = None
+
+class Reset(BaseModel):
+    recovery_token: str
+    password: str | None = None
+    password_check: str | None = None
+    logout: str | None = False

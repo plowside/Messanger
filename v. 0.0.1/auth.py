@@ -31,6 +31,9 @@ def get_password_hash(password):
 
 
 def get_user(username: str):
+    _db = SQLiteDatabase()
+    cur, con = _db._get_connection()
+
     user_db = cur.execute('SELECT * FROM users WHERE username = ?', [username]).fetchone()
     if user_db:
         return UserInDB(**user_db)
@@ -39,6 +42,9 @@ def get_user(username: str):
 def reg_user(user: UserRegister):
     user.first_name = user.first_name if user.first_name != '' else None
     user.last_name = user.last_name if user.last_name != '' else None
+
+    _db = SQLiteDatabase()
+    cur, con = _db._get_connection()
 
     cur.execute('''INSERT INTO users(username, first_name, last_name, hashed_password, registration_date)
         VALUES (?, ?, ?, ?, ?)''', [user.username, user.first_name, user.last_name, get_password_hash(user.password), int(time.time())])
@@ -102,6 +108,18 @@ async def get_current_user_None(token: Annotated[str, Depends(oauth2_scheme)]):
         return None
     return user
 
+async def reset_user(recovery_token: str, password: str):
+    try:
+        payload = jwt.decode(recovery_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: int = payload.get("user_id")
+        if user_id is None:
+            return {'status': False}
+        token_data = TokenData(id=user_id)
+    except:
+        return {'status': False}
+    
+
+    return {'status': True, 'username': db_reset_user(user_id=token_data.id, hashed_password=get_password_hash(password))}
 
 async def get_current_active_user(
     current_user: Annotated[User, Depends(get_current_user)]

@@ -1,0 +1,6 @@
+pydantic
+uvicorn
+fastapi
+passlib[bcrypt]
+python-jose[cryptography]
+starlette

@@ -222,7 +222,7 @@
 				flex-grow: 1;
 			}
 
-			.container .profiles-side .recent-chats {
+			.container .profiles-side .recent-dialogs {
 				display: flex;
 				flex-direction: column;
 				overflow-y: auto;
@@ -231,25 +231,25 @@
 
 
 
-			/*.container .profiles-side .recent-chats::-webkit-scrollbar-track {
+			/*.container .profiles-side .recent-dialogs::-webkit-scrollbar-track {
 				-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 				background-color: rgba(219, 219, 219, 0.3);
 				border-radius: 10px;
 			}*/
 
-			.container .profiles-side .recent-chats::-webkit-scrollbar {
+			.container .profiles-side .recent-dialogs::-webkit-scrollbar {
 				width: 7px;
 				background-color: #333; /* #303338 */
 				border-radius: 10px;
 			}
 
-			.container .profiles-side .recent-chats::-webkit-scrollbar-thumb {
+			.container .profiles-side .recent-dialogs::-webkit-scrollbar-thumb {
 				-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 				background-color: rgba(219, 219, 219, 0.3);  /* #737579 */
 				border-radius: 10px;
 			}
 
-			.container .profiles-side .recent-chats .chat {
+			.container .profiles-side .recent-dialogs .chat {
 				padding: 10px 10px;
 				display: flex;
 				flex-direction: row;
@@ -258,12 +258,12 @@
 				transition: all 0.2s ease-in-out;
 			}
 
-			.container .profiles-side .recent-chats .chat.active {
+			.container .profiles-side .recent-dialogs .chat.active {
 				background-color: #222;
 				transition: all 0.2s ease-in-out;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-img {
+			.container .profiles-side .recent-dialogs .chat .contact-img {
 				width: 40px;
 				height: 40px;
 				margin: 0px 10px 0px 5px;
@@ -273,23 +273,23 @@
 				font-size: 30px;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-recent-message {
+			.container .profiles-side .recent-dialogs .chat .contact-recent-message {
 				display: flex;
 				flex-direction: column;
 				justify-content: space-between;
 				flex-grow: 1;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-recent-message .contact-name {
+			.container .profiles-side .recent-dialogs .chat .contact-recent-message .contact-name {
 				font-size: 16px;
 				overflow-x: hidden;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-recent-message .recent-message {
+			.container .profiles-side .recent-dialogs .chat .contact-recent-message .recent-message {
 				font-size: 13px;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-message-status {
+			.container .profiles-side .recent-dialogs .chat .contact-message-status {
 				display: flex;
 				flex-direction: column;
 				justify-content: space-between;
@@ -297,11 +297,11 @@
 				text-align: end;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-message-status .recent-message-time {
+			.container .profiles-side .recent-dialogs .chat .contact-message-status .recent-message-time {
 				font-size: 13px;
 			}
 
-			.container .profiles-side .recent-chats .chat .contact-message-status .contact-setting-status {
+			.container .profiles-side .recent-dialogs .chat .contact-message-status .contact-setting-status {
 				font-size: 15px;
 			}
 
@@ -639,8 +639,8 @@
 						placeholder="Search contact"
 						/>
 				</div>
-				<!-- Recent chats -->
-				<div class="recent-chats">
+				<!-- Recent dialogs -->
+				<div class="recent-dialogs">
 				</div>
 			</div>
 			<!-- Content side -->
@@ -702,8 +702,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
 		<script type="text/javascript">
-
-
+		    var search_input = document.querySelector('.search-contact')
 			var chat_container = document.getElementsByClassName('chat-container')[0];
 			var content_side = document.getElementById('content-side');
 			var chat_area = document.getElementById('chat-area');
@@ -712,116 +711,108 @@
 			var profile_name = document.getElementsByClassName('profile-name')[0];
 			var chat_profile_img = document.querySelector('.chat-profile-img');
 			var chat_profile_name = document.querySelector('.chat-profile-name');
+			var chat_profile_details = document.querySelector('.chat-profile-details');
 			var chat_back_button = document.querySelector('.chat-back-button');
 			var chat_search_button = document.querySelector('.search-contact');
 
 			var chat_opponent_name = document.querySelectorAll('.popup-rtl > .chatter-name');
 			var chat_your_name = document.querySelectorAll('.popup-ltr > .chatter-name');
 
+			var textInput = document.querySelector('.chat-input');
 
+			var userData = null;
 
-			function add_chats() {
-				// Assuming data is an object containing chats data
-				fetch('/api/chats').then(response => {
-					if (!response.ok){
-						throw new Error('Network pizdec');
+			textInput.addEventListener("keydown", function(e) {
+				if (e.key === "Enter"){
+					send_msg();
+					textInput.value = "";
+				}
+			})
+
+			search_input.addEventListener("input", function(e) {
+				find_matches();
+			})
+
+			async function loadUserData() {
+				try {
+					var response = await fetch('/api/me');
+					if (response.ok) {
+						userData = await response.json();
+						console.log(userData);
+						profile_name.innerText = userData.username
+				} else {
+						console.error('Не удалось получить данные пользователя');
 					}
-					return response.json();
-				}).then(data => {
-				// Get the container where you want to append the chat elements
-				var chatsContainer = document.querySelector('.recent-chats');
+				} catch (error) {
+					console.error('Произошла ошибка при загрузке данных пользователя:', error);
+				}
+			}
 
-				// Get the profile elements
-				var chat_profile_img = document.querySelector('.chat-profile-img');
-				var chat_profile_name = document.querySelector('.chat-profile-name');
-				var profiles_side = document.querySelector('.profiles-side');
-				var content_side = document.querySelector('.content-side');
-				var chat_area = document.querySelector('.chat-area');
-				var blank_page = document.querySelector('.blank-page');
-				var chat_opponent_name = document.querySelectorAll('.chat-opponent-name');
-				var chat_your_name = document.querySelectorAll('.chat-your-name');
-				var chat_container = document.querySelector('.chat-container');
+			var ws = new WebSocket(`ws://127.0.0.1:8000/ws`);
+			ws.onmessage = function(event) {
+				var message = JSON.parse(event.data);
+				console.log(message);
+				if (message.dialog_id == chat_profile_details.getAttribute('chat-id'))chat_set_messages(null, message);
+			};
 
-				// Loop through the data.chats array and create elements
-				data.conversations.forEach(chat => {
+
+			async function find_matches(){
+				if (search_input.value === '') return add_dialogs();
+				var response = await fetch('/api/find?' + new URLSearchParams({
+					q: search_input.value
+				}))
+				if (!response.ok){
+					throw new Error('Network pizdec');
+				}
+				data = await response.json()
+
+				data = data.results;
+				var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
+				dialogsElement.forEach(function(_Div) {
+					_Div.remove();
+				});
+				data.users.forEach(user =>{
 					// Create the chat element
-					var chatElement = document.createElement('div');
-					chatElement.className = `chat contact-${chat.id}`;
-					chatElement.setAttribute("chat-id", chat.id);
+					var dialog_element = document.createElement('div');
+					dialog_element.className = `chat contact-${user.user_id}`;
+					dialog_element.setAttribute("chat-id", user.user_id);
 
 					// Create the contact image element
 					var contactImage = document.createElement('img');
 					contactImage.className = 'contact-img';
-					if (chat.avatar === null) contactImage.src = './img/avatar.png';
-					else contactImage.src = `./img/${chat.id}/${chat.avatar}/avatar.png`;
 
+					if (user.avatar === undefined) contactImage.src = './img/avatar.png';
+					else contactImage.src = `./img/${user.user_id}/avatar.png`;
 
-					// Create the contact recent message container
 					var recentMessageContainer = document.createElement('div');
 					recentMessageContainer.className = 'contact-recent-message';
+
 
 					// Create the contact name element
 					var contactName = document.createElement('h4');
 					contactName.className = 'contact-name';
-					contactName.textContent = chat.name;
+					if (user.first_name === null && user.last_name === null) contactName.textContent = user.username;
+					else if (user.first_name !== null && user.last_name === null) contactName.textContent = user.first_name;
+					else if (user.first_name === null && user.last_name !== null) contactName.textContent = user.last_name;
+					else contactName.textContent = `${user.first_name} ${user.last_name}`;
 
 					// Create the recent message element
 					var recentMessage = document.createElement('p');
 					recentMessage.className = 'recent-message';
-					if (chat.last_message.data === null){
-						recentMessage.textContent = "Начните общаться!";
-					}
-					else {
-						recentMessage.textContent = chat.last_message.data;
-					}
+					recentMessage.textContent = "Начните общаться!";
+					
 
-					// Create the contact message status container
-					var messageStatusContainer = document.createElement('div');
-					messageStatusContainer.className = 'contact-message-status';
-
-					// Create the recent message time element
-					var messageTime = document.createElement('p');
-					messageTime.className = 'recent-message-time';
-					if (chat.last_message.date === null){
-						messageTime.textContent = "";
-					}
-					else {
-						var diff = (Date.now() - (chat.last_message.date * 1000)) / 1000;
-						var date = new Date(chat.last_message.date * 1000);
-						if (diff <= 86400){
-							var hours = date.getHours().toString().padStart(2, '0');
-							var minutes = date.getMinutes().toString().padStart(2, '0');
-							messageTime.textContent = `${hours}:${minutes}`;
-						} else if (diff <= 604800) {
-							var dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-							messageTime.textContent = dayNames[date.getDay()];
-						} else {
-							messageTime.textContent = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
-						}
-					}
-
-
-					// Append elements to their respective containers
 					recentMessageContainer.appendChild(contactName);
 					recentMessageContainer.appendChild(recentMessage);
-					messageStatusContainer.appendChild(messageTime);
-
-					// Check if the chat is muted and create the mute icon if needed
-					if (chat.is_muted) {
-						var muteIcon = document.createElement('i');
-						muteIcon.className = 'contact-setting-status bi bi-volume-mute';
-						messageStatusContainer.appendChild(muteIcon);
-					}
 
 					// Append elements to the chat element
-					chatElement.appendChild(contactImage);
-					chatElement.appendChild(recentMessageContainer);
-					chatElement.appendChild(messageStatusContainer);
+					dialog_element.appendChild(contactImage);
+					dialog_element.appendChild(recentMessageContainer);
+					
 
-					// Add a click event listener to the chat element
-					chatElement.addEventListener('click', function (e) {
-						var chatsElement = document.querySelectorAll('.recent-chats > .chat');
-						chatsElement.forEach(function (j) {
+					dialog_element.addEventListener('click', function (e) {
+						var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
+						dialogsElement.forEach(function (j) {
 							j.classList.remove('active');
 						});
 
@@ -833,10 +824,24 @@
 							popupDiv.remove();
 						})
 
-						chat_set_messages(chatElement.getAttribute('chat-id'));
-						chatElement.classList.add('active');
+						fetch('/api/dialog?' + new URLSearchParams({
+							id: dialog_element.getAttribute('chat-id')
+						})).then(response => {
+							if (!response.ok){
+								throw new Error('Network pizdec');
+							}
+							return response.json();
+						}).then(data => {
+							if (data.status === true){
+								return add_dialogs();
+							}
+						})
 
-						var children = [].slice.call(chatElement.children);
+						chat_set_messages(dialog_element.getAttribute('chat-id'));
+						chat_profile_details.setAttribute('chat-id', dialog_element.getAttribute('chat-id'));
+						dialog_element.classList.add('active');
+
+						var children = [].slice.call(dialog_element.children);
 
 						for (let a = 0; a < children.length; a++) {
 							if (children[a].className.indexOf('contact-img') !== -1) {
@@ -847,6 +852,7 @@
 								for (let b = 0; b < children[a].children.length; b++) {
 									if (children[a].children[b].className.indexOf('contact-name') !== -1) {
 										chat_profile_name.innerText = children[a].children[b].innerText;
+
 									}
 								}
 							}
@@ -867,10 +873,182 @@
 							a.innerText = profile_name.innerText;
 						});
 						chat_container.scrollTo(0, chat_container.scrollHeight);
+						console.log('scrolled');
+					});
+
+
+					// Append the chat element to the container where you want to display chats
+					// For example, if you have a container with the class "recent-dialogs", you can do:
+					document.querySelector('.recent-dialogs').appendChild(dialog_element);
+				})
+			}
+
+
+			loadUserData();
+
+			function send_msg() {
+				ws.send(`${chat_profile_details.getAttribute('chat-id')}:message:${textInput.value}`);
+			}
+
+
+			function add_dialogs() {
+				// Assuming data is an object containing dialogs data
+				fetch('/api/dialogs').then(response => {
+					if (!response.ok){
+						throw new Error('Network pizdec');
+					}
+					return response.json();
+				}).then(data => {
+				var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
+				dialogsElement.forEach(function(_Div) {
+					_Div.remove();
+				});
+				// Get the container where you want to append the chat elements
+				var dialogsContainer = document.querySelector('.recent-dialogs');
+
+				// Get the profile elements
+				var chat_profile_img = document.querySelector('.chat-profile-img');
+				var chat_profile_name = document.querySelector('.chat-profile-name');
+				var profiles_side = document.querySelector('.profiles-side');
+				var content_side = document.querySelector('.content-side');
+				var chat_area = document.querySelector('.chat-area');
+				var blank_page = document.querySelector('.blank-page');
+				var chat_opponent_name = document.querySelectorAll('.chat-opponent-name');
+				var chat_your_name = document.querySelectorAll('.chat-your-name');
+				var chat_container = document.querySelector('.chat-container');
+
+				// Loop through the data.dialogs array and create elements
+				data.dialogs.forEach(chat => {
+					// Create the chat element
+					var chatElement = document.createElement('div');
+					chatElement.className = `chat contact-${chat.dialog_id}`;
+					chatElement.setAttribute("chat-id", chat.dialog_id);
+
+					// Create the contact image element
+					var contactImage = document.createElement('img');
+					contactImage.className = 'contact-img';
+					if (chat.avatar == null) contactImage.src = './img/avatar.png';
+					else contactImage.src = `./img/${chat.dialog_id}/${chat.avatar}/avatar.png`;
+
+
+					// Create the contact recent message container
+					var recentMessageContainer = document.createElement('div');
+					recentMessageContainer.className = 'contact-recent-message';
+
+					// Create the contact name element
+					var contactName = document.createElement('h4');
+					contactName.className = 'contact-name';
+					contactName.textContent = chat.dialog_name;
+
+					// Create the recent message element
+					var recentMessage = document.createElement('p');
+					recentMessage.className = 'recent-message';
+					if (chat.message_text === null){
+						recentMessage.textContent = "Начните общаться!";
+					}
+					else {
+						recentMessage.textContent = chat.message_text;
+					}
+
+					// Create the contact message status container
+					var messageStatusContainer = document.createElement('div');
+					messageStatusContainer.className = 'contact-message-status';
+
+					// Create the recent message time element
+					var messageTime = document.createElement('p');
+					messageTime.className = 'recent-message-time';
+					if (chat.send_time === null){
+						messageTime.textContent = "";
+					}
+					else {
+						var diff = (Date.now() - (chat.send_time * 1000)) / 1000;
+						var date = new Date(chat.send_time * 1000);
+						if (diff <= 86400){
+							var hours = date.getHours().toString().padStart(2, '0');
+							var minutes = date.getMinutes().toString().padStart(2, '0');
+							messageTime.textContent = `${hours}:${minutes}`;
+						} else if (diff <= 604800) {
+							var dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+							messageTime.textContent = dayNames[date.getDay()];
+						} else {
+							messageTime.textContent = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+						}
+					}
+
+
+					// Append elements to their respective containers
+					recentMessageContainer.appendChild(contactName);
+					recentMessageContainer.appendChild(recentMessage);
+					messageStatusContainer.appendChild(messageTime);
+
+					// Check if the chat is muted and create the mute icon if needed
+					if (chat.is_muted == true) {
+						var muteIcon = document.createElement('i');
+						muteIcon.className = 'contact-setting-status bi bi-volume-mute';
+						messageStatusContainer.appendChild(muteIcon);
+					}
+
+					// Append elements to the chat element
+					chatElement.appendChild(contactImage);
+					chatElement.appendChild(recentMessageContainer);
+					chatElement.appendChild(messageStatusContainer);
+
+					// Add a click event listener to the chat element
+					chatElement.addEventListener('click', function (e) {
+						var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
+						dialogsElement.forEach(function (j) {
+							j.classList.remove('active');
+						});
+
+
+
+						// Удалить все сообщения
+						var chat_container_elements = document.querySelectorAll('.chat-container > div[class^="popup"]')
+						chat_container_elements.forEach(function(popupDiv){
+							popupDiv.remove();
+						})
+
+						chat_set_messages(chatElement.getAttribute('chat-id'));
+						chat_profile_details.setAttribute('chat-id', chatElement.getAttribute('chat-id'));
+						chatElement.classList.add('active');
+
+						var children = [].slice.call(chatElement.children);
+
+						for (let a = 0; a < children.length; a++) {
+							if (children[a].className.indexOf('contact-img') !== -1) {
+								chat_profile_img.src = children[a].src;
+							}
+
+							if (children[a].className.indexOf('contact-recent-message') !== -1) {
+								for (let b = 0; b < children[a].children.length; b++) {
+									if (children[a].children[b].className.indexOf('contact-name') !== -1) {
+										chat_profile_name.innerText = children[a].children[b].innerText;
+
+									}
+								}
+							}
+						}
+						if (profiles_side.className.indexOf('active') != -1) {
+							profiles_side.classList.remove('active');
+						} if (content_side.className.indexOf('active') == -1) {
+							content_side.classList.add('active');
+						} if (chat_area.className.indexOf('active') == -1) {
+							chat_area.classList.add('active');
+						} if (blank_page.className.indexOf('active') != -1) {
+							blank_page.classList.remove('active');
+						}
+						chat_opponent_name.forEach(function (a) {
+							a.innerText = chat_profile_name.innerText;
+						});
+						chat_your_name.forEach(function (a) {
+							a.innerText = profile_name.innerText;
+						});
+						chat_container.scrollTo(0, chat_container.scrollHeight);
+						console.log('scrolled');
 					});
 
 					// Append the chat element to the container
-					chatsContainer.appendChild(chatElement);
+					dialogsContainer.appendChild(chatElement);
 				});
 
 				})
@@ -879,7 +1057,7 @@
 
 
 			chat_back_button.addEventListener('click', function (e) {
-				var chatsElement = document.querySelectorAll('.recent-chats > .chat');
+				var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
 
 				content_side.classList.remove('active');
 				profiles_side.classList.add('active');
@@ -892,7 +1070,7 @@
 					blank_page.classList.add('active');
 				}
 
-				chatsElement.forEach(function (j) {
+				dialogsElement.forEach(function (j) {
 					j.classList.remove('active');
 				});
 			});
@@ -900,9 +1078,9 @@
 
 
 			chat_search_button.addEventListener('input', function (e) {
-				var chatsElement = document.querySelectorAll('.recent-chats > .chat');
+				var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
 
-				chatsElement.forEach(chat => {
+				dialogsElement.forEach(chat => {
 					var cn = chat.querySelector('.contact-name').textContent.toLowerCase();
 					var rm = chat.querySelector('.recent-message').textContent.toLowerCase();
 					var cnT = transliterate(cn);
@@ -932,60 +1110,100 @@
 
 
 
-			function chat_set_messages(conversation_id){
+			function chat_set_messages(dialog_id, message = null){
 				chat_container_element = document.querySelector('.chat-container')
 
-				fetch('/api/chats?' + new URLSearchParams({
-					conversation_id: conversation_id
-				})).then(response => {
-					return response.json();
-				}).then(data => {
-					if (data.status === false){
-						return alert('pizdec');
+
+				if (message !== null){
+					var chatElement = document.createElement('div');
+					if (message.message_type == 'message') {
+						if (message.sender_id === userData.user_id) chatElement.className = "popup-ltr primary-message";
+						else chatElement.className = "popup-rtl primary-message";
+
+						var chat_text = document.createElement('p');
+						chat_text.className = "chat-text";
+						
+						chat_text.innerHTML = messageDataWithLineBreaks = message.message_text.replace(/[\r\n]/g, '<br>');
+						
+						chat_time_status = document.createElement('span');
+						chat_time_status.className = "chat-time-status";
+
+						var date = new Date(message.send_time * 1000);
+						var hours = date.getHours().toString().padStart(2, '0');
+						var minutes = date.getMinutes().toString().padStart(2, '0');
+						chat_time_status.textContent = `${hours}:${minutes}`;
+
+						chat_text.appendChild(chat_time_status);
+						
+						chatElement.appendChild(chat_text);
+					} else if (message.message_type == 'local_update') {
+						chatElement.className = "chat-information-popup";
+						var chat_information_text = document.createElement('p');
+						chat_information_text.className = "chat-information-text";
+
+						chat_information_text.innerHTML = messageDataWithLineBreaks = message.message_text.replace(/[\r\n]/g, '<br>');
+						
+						chatElement.appendChild(chat_information_text);
 					}
-					data.messages.forEach(function (e){
-						var chatElement = document.createElement('div');
-						if (e.type == 'message') {
-							if (e.is_me === true) chatElement.className = "popup-ltr primary-message";
-							else chatElement.className = "popup-rtl primary-message";
 
-							var chat_text = document.createElement('p');
-							chat_text.className = "chat-text";
-							
-							chat_text.innerHTML = messageDataWithLineBreaks = e.message_data.replace(/[\r\n]/g, '<br>');
-							
-							chat_time_status = document.createElement('span');
-							chat_time_status.className = "chat-time-status";
+					chat_container_element.appendChild(chatElement);
 
-							var date = new Date(e.create_date * 1000);
-							var hours = date.getHours().toString().padStart(2, '0');
-							var minutes = date.getMinutes().toString().padStart(2, '0');
-							chat_time_status.textContent = `${hours}:${minutes}`;
-
-							chat_text.appendChild(chat_time_status);
-							
-							chatElement.appendChild(chat_text);
-						} else if (e.message_type == 'local_update') {
-							chatElement.className = "chat-information-popup";
-							var chat_information_text = document.createElement('p');
-							chat_information_text.className = "chat-information-text";
-
-							chat_information_text.innerHTML = messageDataWithLineBreaks = e.message_data.replace(/[\r\n]/g, '<br>');
-							
-							chatElement.appendChild(chat_information_text);
+				} else {
+					fetch('/api/dialogs?' + new URLSearchParams({
+						dialog_id: dialog_id
+					})).then(response => {
+						return response.json();
+					}).then(data => {
+						if (data.status === false){
+							return alert('pizdec');
 						}
+						data.messages.forEach(function (e){
+							var chatElement = document.createElement('div');
+							if (e.message_type == 'message') {
+								if (e.sender_id === userData.user_id) chatElement.className = "popup-ltr primary-message";
+								else chatElement.className = "popup-rtl primary-message";
 
-						chat_container_element.appendChild(chatElement);
+								var chat_text = document.createElement('p');
+								chat_text.className = "chat-text";
+								
+								chat_text.innerHTML = messageDataWithLineBreaks = e.message_text.replace(/[\r\n]/g, '<br>');
+								
+								chat_time_status = document.createElement('span');
+								chat_time_status.className = "chat-time-status";
+
+								var date = new Date(e.send_time * 1000);
+								var hours = date.getHours().toString().padStart(2, '0');
+								var minutes = date.getMinutes().toString().padStart(2, '0');
+								chat_time_status.textContent = `${hours}:${minutes}`;
+
+								chat_text.appendChild(chat_time_status);
+								
+								chatElement.appendChild(chat_text);
+							} else if (e.message_type == 'local_update') {
+								chatElement.className = "chat-information-popup";
+								var chat_information_text = document.createElement('p');
+								chat_information_text.className = "chat-information-text";
+
+								chat_information_text.innerHTML = messageDataWithLineBreaks = e.message_text.replace(/[\r\n]/g, '<br>');
+								
+								chatElement.appendChild(chat_information_text);
+							}
+
+							chat_container_element.appendChild(chatElement);
+						})
+
+
 					})
-
-
-				})
+				}
+				chat_container.scrollTo(0, chat_container.scrollHeight);
 			}
 
 
 
 
-			add_chats();
+
+
+			add_dialogs();
 		</script>
 	</body>
 </html>

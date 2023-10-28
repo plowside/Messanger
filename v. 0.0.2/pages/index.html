@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Мессенджер</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+        }
+        #message-list {
+            width: 300px;
+            background-color: #1e1e1e;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-y: scroll;
+            max-height: 400px;
+        }
+        #message-input {
+            width: 300px;
+            background-color: #1e1e1e;
+            border: none;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="message-list">
+        </div>
+        <input type="text" id="message-input" placeholder="Введите сообщение...">
+    </div>
+    <script>
+        var client_id = Date.now();
+        var ws = new WebSocket(`ws://${location.href.replace(/^https?:\/\//, '')}/ws`);
+        var messageList = document.getElementById('message-list');
+        var messageInput = document.getElementById('message-input');
+
+        ws.onmessage = function(event) {
+            var message = event.data;
+            var messageElement = document.createElement('div');
+            messageElement.innerText = message;
+            messageList.appendChild(messageElement);
+            // Прокрутка вниз, чтобы видеть новые сообщения
+            messageList.scrollTop = messageList.scrollHeight;
+        };
+
+        messageInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                var message = messageInput.value;
+                ws.send(message);
+                messageInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

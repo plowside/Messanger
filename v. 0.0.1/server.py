@@ -1,11 +1,11 @@
-import uvicorn, random, time, sqlite3, json
+import uvicorn, random, time, sqlite3, json, uuid
 
 from datetime import datetime, timedelta
-from typing import Annotated
+from typing import Annotated, Dict
 
-from fastapi import Depends, FastAPI, HTTPException, Response, Request, Cookie, status
+from fastapi import Depends, FastAPI, HTTPException, Response, Request, Cookie, Query, status, WebSocket, WebSocketDisconnect
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exception_handlers import (
     http_exception_handler,
@@ -17,12 +17,37 @@ from jose import JWTError, jwt
 
 
 
-from auth import *#ACCESS_TOKEN_EXPIRE_MINUTES, create_jwt_token, authenticate_user, get_current_active_user, get_user, reg_user
-from models import *#UserRegister, Token, User
+from auth import * #ACCESS_TOKEN_EXPIRE_MINUTES, create_jwt_token, authenticate_user, get_current_active_user, get_user, reg_user
+from models import * #UserRegister, Token, User
 
 from dbApi import *
 
 app = FastAPI()
+
+class WebSocketManager:
+    def __init__(self):
+        self.websocket_connections: Dict[WebSocket, int] = {}
+
+    async def connect(self, websocket: WebSocket, user_id: int):
+        await websocket.accept()
+        self.websocket_connections[websocket] = user_id
+
+    async def disconnect(self, websocket: WebSocket):
+        user_id = self.websocket_connections.get(websocket)
+        if user_id:
+            del self.websocket_connections[websocket]
+
+    async def send_message(self, websocket: WebSocket, message: str):
+        print(f"WS: {self.websocket_connections[websocket]} = {message}")
+        await websocket.send_text(message)
+
+
+    def get_connection(self, user_id):
+        connection = [x for x, z in self.websocket_connections.items() if z == user_id]
+        if connection: return connection[0]
+        else: return False
+
+manager = WebSocketManager()
 
 
 ########################################## ROUTES => PAGES #################################################
@@ -69,7 +94,7 @@ async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
     return HTMLResponse(open('pages/forgot.html', encoding='utf-8').read())
 
 @app.get("/reset")
-async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
+async def getreg(token: str = Query(None, description="The reset token (recovery_token)"), Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user_None(Authorization)
     if user:
         raise HTTPException(
@@ -77,6 +102,7 @@ async def getreg(Authorization: Annotated[str | None, Cookie()] = None):
             detail="Already logged in",
             headers={},
         )
+    print(token)
     return HTMLResponse(open('pages/reset.html', encoding='utf-8').read())
 
 
@@ -91,8 +117,7 @@ async def chats(Authorization: Annotated[str | None, Cookie()] = None):
 @app.get('/api/chats')
 async def api_chats(Authorization: Annotated[str | None, Cookie()] = None, conversation_id: int = None):
     user = await get_current_user(Authorization)
-    _db = SQLiteDatabase()
-    cur, con = _db._get_connection()
+
 
     if conversation_id is None:
         conversations = db_getConversations(user.id)
@@ -106,10 +131,48 @@ async def api_chats(Authorization: Annotated[str | None, Cookie()] = None, conve
 
 
 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, Authorization: Annotated[str | None, Cookie()] = None):
+    user = await get_current_user(Authorization)
 
+    await manager.connect(websocket, user.id)
 
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f'data: {data}')
 
+            chat_id = int(data.split(':')[0])
+            type = data.split(':')[1]
+            text = data.split(':')[2]
+            print(f'message: {chat_id} | {type} | {text}')
+            message = db_addMessage(user.id, chat_id, type, text)
+            print(db_get_chat_users(chat_id))
+            for x in db_get_chat_users(chat_id):
+                message['is_me'] = x['user_id'] == user.id
+                await manager.send_message(manager.get_connection(x['user_id']), json.dumps(message))
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket)
+    except Exception as e:
+        print(e)
+
+@app.get('/test/{user_id}')
+async def tests(user_id: int):
+    connection = manager.get_connection(user_id)
+    if connection: await manager.send_message(connection, 'hello my nigga')
+    else: return False
+    return 'hello my nigga'
+
+@app.get('/test')
+async def tests():
+    return HTMLResponse(open('pages/index.html', encoding='utf-8').read())
 ############################################# AUTH #################################################
+@app.get("/api/me")
+async def get_me(Authorization: Annotated[str | None, Cookie()] = None):
+    user = await get_current_user(Authorization)
+
+    return {'user_id': user.id, 'username': user.username, 'email': user.email, 'first_name': user.first_name, 'last_name': user.last_name}    
+
 @app.post("/api/forgot")
 async def api_forgot(request_data: Forgot):
     user = get_user(request_data.username)
@@ -122,10 +185,42 @@ async def api_forgot(request_data: Forgot):
 
     recovery_token_exiperes = timedelta(days=1)
     recovery_token = create_jwt_token(
-        data={"username": user.username}, expires_delta=recovery_token_exiperes
+        data={"user_id": user.id}, expires_delta=recovery_token_exiperes
     )
 
     return {"recovery_token": recovery_token}
+
+@app.post("/api/reset")
+async def api_forgot(request_data: Reset):
+    #user = get_user(request_data.username)
+    if False:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Account with this username was not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    elif request_data.password != request_data.password_check:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Passwords don't match",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+    status = await reset_user(request_data.recovery_token, request_data.password)
+    to_return = {'status': status['status']}
+
+    if status['status']:
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        print(status['username'])
+        access_token = create_jwt_token(
+            data={"sub": status['username']}, expires_delta=access_token_expires
+        )
+
+        to_return['access_token'] = access_token
+        to_return['token_type'] = 'Berear'
+
+    return to_return
 
 
 @app.post("/api/auth", response_model=Token)
@@ -197,11 +292,7 @@ async def custom_http_exception_handler(request, exc):
     return await http_exception_handler(request, exc)
 
 
-@app.get('/test')
-async def tests(request: Request):
-    #response.set_cookie(key='test', value='200')
-    return 200
 
 
 if __name__ == '__main__':
-    uvicorn.run(app)
+    uvicorn.run(app, )
