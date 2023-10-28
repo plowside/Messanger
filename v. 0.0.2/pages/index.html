@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Мессенджер</title>
     <style>
         body {
@@ -47,7 +48,7 @@
     </div>
     <script>
         var client_id = Date.now();
-        var ws = new WebSocket(`ws://${location.href.replace(/^https?:\/\//, '')}/ws`);
+        var ws = new WebSocket(`ws://${location.host}/ws`);
         var messageList = document.getElementById('message-list');
         var messageInput = document.getElementById('message-input');
 

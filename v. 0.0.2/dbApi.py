@@ -130,7 +130,7 @@ def db_update_user(user_id, **kwargs):
     return user
 
 
-def db_create_dialog(user_id, target_user_id, dialog_name, dialog_type = 'private'):
+def db_create_dialog(user_id, target_user_id, dialog_name = None, dialog_type = 'private'):
     _db = SQLiteDatabase()
     con, cur = _db._get_connection()
     creation_date = int(time.time())
@@ -146,7 +146,7 @@ def db_create_dialog(user_id, target_user_id, dialog_name, dialog_type = 'privat
 
     return dialog_id
 
-def db_get_dialogs(user_id, dialog_id = None):
+def db_get_dialogs(user_id = None, dialog_id = None):
     _db = SQLiteDatabase()
     con, cur = _db._get_connection()
 
@@ -154,7 +154,10 @@ def db_get_dialogs(user_id, dialog_id = None):
         dialog = cur.execute('''
             SELECT
                 d.id AS dialog_id,
-                d.dialog_name,
+                CASE 
+                    WHEN d.dialog_name IS NULL THEN u.username
+                    ELSE d.dialog_name
+                END AS dialog_name,
                 d.dialog_type,
                 m.id AS message_id,
                 m.sender_id,
@@ -171,34 +174,51 @@ def db_get_dialogs(user_id, dialog_id = None):
             ) AS m1 ON d.id = m1.dialog_id
             LEFT JOIN messages AS m ON m1.dialog_id = m.dialog_id AND m1.max_send_time = m.send_time
             LEFT JOIN dialog_users AS du ON d.id = du.dialog_id
-            WHERE du.dialog_id = ?
+            LEFT JOIN users AS u ON u.id = du.user_id
+            WHERE du.dialog_id = ?;
+
         ''', [dialog_id]).fetchall()
     else:
         dialog = cur.execute('''
             SELECT
                 d.id AS dialog_id,
-                d.dialog_name,
+                CASE 
+                    WHEN d.dialog_name IS NULL THEN u.username
+                    ELSE d.dialog_name
+                END AS dialog_name,
                 d.dialog_type,
-                m.id AS message_id,
-                m.sender_id,
-                m.message_type,
-                m.message_text,
-                m.send_time
-            FROM dialogs AS d
+                m.sender_id AS last_message_sender_id,
+                m.message_text AS last_message_text,
+                m.send_time AS last_message_send_time,
+                du_.user_id
+
+            FROM dialog_users as du    
+
+
+            LEFT JOIN
+                dialogs AS d ON d.id = du.dialog_id
+
             LEFT JOIN (
                 SELECT
                     dialog_id,
                     MAX(send_time) AS max_send_time
                 FROM messages
                 GROUP BY dialog_id
-            ) AS m1 ON d.id = m1.dialog_id
-            LEFT JOIN messages AS m ON m1.dialog_id = m.dialog_id AND m1.max_send_time = m.send_time
-            LEFT JOIN dialog_users AS du ON d.id = du.dialog_id
+            ) AS m1 ON du.dialog_id = m1.dialog_id
+            LEFT JOIN 
+                messages AS m ON m1.dialog_id = m.dialog_id AND
+                m1.max_send_time = m.send_time
+
+            LEFT JOIN dialog_users as du_ ON du_.dialog_id = d.id AND du_.user_id != ?
+            LEFT JOIN users AS u ON u.id = du_.user_id
+
             WHERE du.user_id = ?
-        ''', [user_id]).fetchall()
-
-
+            ''', [user_id, user_id]).fetchall()
+        for x in dialog:
+            x['last_message'] = {'sender_id': x['last_message_sender_id'], 'text': x['last_message_text'],'send_time': x['last_message_send_time']}
+            del x['last_message_sender_id']; del x['last_message_text']; del x['last_message_send_time']
     return dialog
+
 
 def db_find_dialogs(user_id, query):
     _db = SQLiteDatabase()

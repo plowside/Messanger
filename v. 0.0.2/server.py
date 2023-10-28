@@ -38,7 +38,6 @@ class WebSocketManager:
             del self.websocket_connections[websocket]
 
     async def send_message(self, websocket: WebSocket, message: str):
-        print(f"WS: {self.websocket_connections[websocket]} = {message}")
         await websocket.send_text(message)
 
 
@@ -143,8 +142,12 @@ async def api_find(id: int = Query(None, description="User id"), Authorization: 
     user = await get_current_user(Authorization)
     user_target = get_user(user_id=id)
 
-    dialog = db_create_dialog(user.id, user_target.id, user_target.username if (user_target.first_name is None or user_target.last_name is None) else f'{user_target.first_name if user_target.last_name is None else user_target.last_name}{" " + user_target.last_name if user_target.last_name is None else ""}')
+    dialog = db_create_dialog(user.id, user_target.id, dialog_name = None)#user_target.username if (user_target.first_name is None or user_target.last_name is None) else f'{user_target.first_name if user_target.last_name is None else user_target.last_name}{" " + user_target.last_name if user_target.last_name is None else ""}'
 
+    message = {'update':'new_dialog', 'data': {'dialog_id': dialog}}
+
+    try: await manager.send_message(manager.get_connection(user_target.id), json.dumps(message))
+    except Exception as e: print(f'errro: {e}')
 
     dialogs = db_get_dialogs(user_id=user.id)
     return {'status': True, 'dialogs': dialogs}
@@ -161,13 +164,16 @@ async def websocket_endpoint(websocket: WebSocket, Authorization: Annotated[str 
             data = await websocket.receive_text()
             print(f'data: {data}')
             if data == '': continue
+            elif data == 'ping':
+                await manager.send_message(websocket, 'pong')
+                continue
 
             dialog_id = int(data.split(':')[0])
             message_type = data.split(':')[1]
             message_text = data.split(':')[2]
             if message_text == '': continue
             message_id = db_create_message(dialog_id=dialog_id, sender_id=user.id, message_type=message_type, message_text=message_text, send_time=int(time.time()))
-            message = db_get_messages(dialog_id, message_id)
+            message = {'update': 'new_message', 'data': db_get_messages(dialog_id, message_id)}
 
             for x in db_get_dialog_users(dialog_id):
                 try:await manager.send_message(manager.get_connection(x['user_id']), json.dumps(message))
@@ -315,4 +321,4 @@ async def custom_http_exception_handler(request, exc):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, )
+    uvicorn.run(app)
