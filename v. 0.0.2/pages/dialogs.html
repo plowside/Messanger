@@ -702,7 +702,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
 		<script type="text/javascript">
-		    var search_input = document.querySelector('.search-contact')
+		    var dialog_search_input = document.querySelector('.search-contact')
 			var chat_container = document.getElementsByClassName('chat-container')[0];
 			var content_side = document.getElementById('content-side');
 			var chat_area = document.getElementById('chat-area');
@@ -713,7 +713,6 @@
 			var chat_profile_name = document.querySelector('.chat-profile-name');
 			var chat_profile_details = document.querySelector('.chat-profile-details');
 			var chat_back_button = document.querySelector('.chat-back-button');
-			var chat_search_button = document.querySelector('.search-contact');
 
 			var chat_opponent_name = document.querySelectorAll('.popup-rtl > .chatter-name');
 			var chat_your_name = document.querySelectorAll('.popup-ltr > .chatter-name');
@@ -723,13 +722,15 @@
 			var userData = null;
 
 			textInput.addEventListener("keydown", function(e) {
-				if (e.key === "Enter"){
+				if (e.ctrlKey || e.altKey || e.shiftKey){
+					return;
+				} else if (e.key === "Enter"){
 					send_msg();
 					textInput.value = "";
 				}
 			})
 
-			search_input.addEventListener("input", function(e) {
+			dialog_search_input.addEventListener("input", function(e) {
 				find_matches();
 			})
 
@@ -758,7 +759,7 @@
 					
 					setInterval(() => {
 						if (ws.readyState === WebSocket.OPEN) {
-							ws.send('ping');
+							ws.send(JSON.stringify({ping: '?'}));
 						}
 					}, 10000);
 				};
@@ -775,6 +776,18 @@
 					console.log(message);
 					if (message.update == 'new_message'){
 						message = message.data;
+						var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
+						dialogsElement.forEach(function(_Div) {
+							if (parseInt(_Div.getAttribute('chat-id')) === message.dialog_id){
+								_Div.querySelector('.contact-recent-message > .recent-message').innerText = message.message_text;
+								var date = new Date(message.send_time * 1000);
+								var hours = date.getHours().toString().padStart(2, '0');
+								var minutes = date.getMinutes().toString().padStart(2, '0');
+								_Div.querySelector('.contact-message-status > .recent-message-time').textContent = `${hours}:${minutes}`;
+							}
+						});
+
+
 						if (message.dialog_id == chat_profile_details.getAttribute('chat-id')) chat_set_messages(null, message);
 					} else if (message.update == 'new_dialog'){
 						message = message.data;
@@ -789,9 +802,9 @@
 
 
 			async function find_matches(){
-				if (search_input.value === '') return add_dialogs();
+				if (dialog_search_input.value === '') return add_dialogs();
 				var response = await fetch('/api/find?' + new URLSearchParams({
-					q: search_input.value
+					q: dialog_search_input.value
 				}))
 				if (!response.ok){
 					throw new Error('Network pizdec');
@@ -831,7 +844,7 @@
 					// Create the recent message element
 					var recentMessage = document.createElement('p');
 					recentMessage.className = 'recent-message';
-					recentMessage.textContent = "Начните общаться!";
+					recentMessage.textContent = user.username;
 					
 
 					recentMessageContainer.appendChild(contactName);
@@ -878,7 +891,8 @@
 				if (text === null) text = textInput.value
 				try {
 					if (ws.readyState === WebSocket.OPEN) {
-						ws.send(`${chat_profile_details.getAttribute('chat-id')}:message:${text}`);
+						var data = {dialog_id: parseInt(chat_profile_details.getAttribute('chat-id')), message_type: "message", message_text: text};
+						ws.send(JSON.stringify(data));
 					} else
 					{
 						create_websocket();
@@ -1079,7 +1093,7 @@
 
 
 
-			chat_search_button.addEventListener('input', function (e) {
+			dialog_search_input.addEventListener('input', function (e) {
 				var dialogsElement = document.querySelectorAll('.recent-dialogs > .chat');
 
 				dialogsElement.forEach(dialog => {
@@ -1088,7 +1102,7 @@
 					var cnT = transliterate(cn);
 					var rmT = transliterate(rm);
 
-					var searchValue = chat_search_button.value.toLowerCase();
+					var searchValue = dialog_search_input.value.toLowerCase();
 					var searchValueT = transliterate(searchValue);
 
 					if (

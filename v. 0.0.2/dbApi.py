@@ -135,7 +135,21 @@ def db_create_dialog(user_id, target_user_id, dialog_name = None, dialog_type = 
     con, cur = _db._get_connection()
     creation_date = int(time.time())
 
-    if cur.execute("SELECT id FROM dialogs WHERE id IN (SELECT dialog_id FROM dialog_users WHERE user_id IN (?, ?))", [user_id, target_user_id]).fetchone():
+    sq = cur.execute("""SELECT d.id
+        FROM dialogs d
+        WHERE EXISTS (
+            SELECT 1
+            FROM dialog_users du1
+            WHERE du1.dialog_id = d.id
+            AND du1.user_id = ?)
+        AND EXISTS (
+            SELECT 1
+            FROM dialog_users du2
+            WHERE du2.dialog_id = d.id
+            AND du2.user_id = ?);
+    """, [user_id, target_user_id]).fetchall()
+
+    if sq != []:
         return False
 
 
@@ -224,44 +238,84 @@ def db_get_dialogs(user_id = None, dialog_id = None):
     return dialog
 
 
-def db_find_dialogs(user_id, query):
+def db_find_dialogs(user_id, query_):
     _db = SQLiteDatabase()
     con, cur = _db._get_connection()
 
-    query = f'%{query.lower()}%'
+    query_ = query_.lower()
+    query = f'%{query_}%'
     results = {}
 
-    results['user_dialogs'] = cur.execute('''
+    results['temp_user_dialogs'] = cur.execute('''
+        SELECT
+            d.id AS dialog_id,
+            CASE 
+                WHEN d.dialog_name IS NULL THEN u.username
+                ELSE d.dialog_name
+            END AS dialog_name,
+            d.dialog_type,
+            m.sender_id AS last_message_sender_id,
+            m.message_text AS last_message_text,
+            m.send_time AS last_message_send_time,
+            du_.user_id,
+            u.first_name AS temp_fn,
+            u.last_name AS temp_ln
+
+        FROM dialog_users as du    
+
+
+        LEFT JOIN
+            dialogs AS d ON d.id = du.dialog_id
+
+        LEFT JOIN (
             SELECT
-                d.id AS dialog_id,
-                d.dialog_name,
-                d.dialog_type,
-                m.id AS message_id,
-                m.sender_id,
-                m.message_type,
-                m.message_text,
-                m.send_time
-            FROM dialogs AS d
-            LEFT JOIN (
-                SELECT
-                    dialog_id,
-                    MAX(send_time) AS max_send_time
-                FROM messages
-                GROUP BY dialog_id
-            ) AS m1 ON d.id = m1.dialog_id
-            LEFT JOIN messages AS m ON m1.dialog_id = m.dialog_id AND m1.max_send_time = m.send_time
-            LEFT JOIN dialog_users AS du ON d.id = du.dialog_id
-            WHERE du.user_id = ? AND
-            d.dialog_name LIKE ? COLLATE NOCASE
-        ''', [user_id, f'%{query}%']).fetchall()
+                dialog_id,
+                MAX(send_time) AS max_send_time
+            FROM messages
+            GROUP BY dialog_id
+        ) AS m1 ON du.dialog_id = m1.dialog_id
+        LEFT JOIN 
+            messages AS m ON m1.dialog_id = m.dialog_id AND
+            m1.max_send_time = m.send_time
 
-    results['users'] = cur.execute('''
+        LEFT JOIN dialog_users as du_ ON du_.dialog_id = d.id AND du_.user_id != ?
+        LEFT JOIN users AS u ON u.id = du_.user_id
+
+        WHERE du.user_id = ?
+        ''', [user_id, user_id]).fetchall()
+
+    results['user_dialogs'] = []
+    user_dialogs_id = []
+    for i, x in enumerate(results['temp_user_dialogs']):
+        user_dialogs_id.append(x['user_id'])
+        if query_ not in (x['dialog_name'].lower() if x['dialog_name'] else '') and query_ not in (x['temp_fn'].lower() if x['temp_fn'] else '') and query_ not in (x['temp_ln'].lower() if x['temp_ln'] else ''):
+            continue
+
+        del x['dialog_name']; del x['temp_fn']; del x['temp_ln']
+
+
+        x['last_message'] = {'sender_id': x['last_message_sender_id'], 'text': x['last_message_text'],'send_time': x['last_message_send_time']}
+        del x['last_message_sender_id']; del x['last_message_text']; del x['last_message_send_time']
+
+        results['user_dialogs'].append(x)
+
+
+
+
+    results['temp_users'] = cur.execute(f'''
             SELECT id AS user_id, username, first_name, last_name FROM users
-            WHERE id != ? AND LOWER(username) LIKE ?
-               OR LOWER(first_name) LIKE ?
-               OR LOWER(last_name) LIKE ?
-        ''', [user_id, query, query, query]).fetchall()
+            WHERE id != ? AND user_id NOT IN ({",".join(["?"] * len(user_dialogs_id))})
+        ''', [user_id] + user_dialogs_id).fetchall()
 
+    results['users'] = []
+    for i, x in enumerate(results['temp_users']):
+        if query_ not in (x['username'].lower() if x['username'] else '') and query_ not in (x['first_name'].lower() if x['first_name'] else '') and query_ not in (x['last_name'].lower() if x['last_name'] else ''):
+            continue
+
+        results['users'].append(x)
+
+
+    del results['temp_users']; del results['temp_user_dialogs']
     return results
 
 

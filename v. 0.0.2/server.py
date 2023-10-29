@@ -45,8 +45,11 @@ class WebSocketManager:
         await self.disconnect(websocket)
 
 
-    async def send_message(self, websocket: WebSocket, message: str):
-        await websocket.send_text(message)
+    async def send_message(self, websocket: WebSocket, message):
+        if type(message) == str:
+            await websocket.send_text(message)
+        elif type(message) == dict:
+            await websocket.send_json(message)
 
 
     def get_connection(self, user_id):
@@ -155,7 +158,7 @@ async def api_find(id: int = Query(None, description="User id"), Authorization: 
         return {'status': False}
 
     message = {'update':'new_dialog', 'data': {'dialog_id': dialog_id}}
-    try: await manager.send_message(manager.get_connection(user_target.id), json.dumps(message))
+    try: await manager.send_message(manager.get_connection(user_target.id), message)
     except Exception as e: print(f'errro: {e}')
 
     dialogs = db_get_dialogs(user_id=user.id)
@@ -167,34 +170,36 @@ async def websocket_endpoint(websocket: WebSocket, Authorization: Annotated[str 
     try: user = await get_current_user(Authorization)
     except Exception as e:
         await manager.on_disconnect(websocket)
-        raise e 
+        raise e
 
     await manager.connect(websocket, user.id)
-    try:
-        while True:
-            data = await websocket.receive_text()
+    while True:
+        try:
+            data = await websocket.receive_json()
             if data == '': continue
-            elif data == 'ping':
+            elif 'ping' in data:
                 await manager.send_message(websocket, 'pong')
                 continue
 
+
             print(f'data: {data}')
-
-
-            dialog_id = int(data.split(':')[0])
-            message_type = data.split(':')[1]
-            message_text = data.split(':')[2]
+            dialog_id = data.get('dialog_id')
+            message_type = data.get('message_type')
+            message_text = data.get('message_text')
             if message_text == '': continue
             message_id = db_create_message(dialog_id=dialog_id, sender_id=user.id, message_type=message_type, message_text=message_text, send_time=int(time.time()))
             message = {'update': 'new_message', 'data': db_get_messages(dialog_id, message_id)}
 
             for x in db_get_dialog_users(dialog_id):
-                try:await manager.send_message(manager.get_connection(x['user_id']), json.dumps(message))
-                except:pass
-    except WebSocketDisconnect:
-        await manager.disconnect(websocket)
-    except Exception as e:
-        print(f"error on Websocket: {e}")
+                try: await manager.send_message(manager.get_connection(x['user_id']), message)
+                except :pass
+
+        except WebSocketDisconnect:
+            return await manager.disconnect(websocket)
+        except ValueError:
+            continue
+        except Exception as e:
+            print(f"error on Websocket: {e}")
 
 
 @app.get('/test/{user_id}')
