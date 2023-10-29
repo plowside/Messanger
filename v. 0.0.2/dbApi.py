@@ -135,6 +135,10 @@ def db_create_dialog(user_id, target_user_id, dialog_name = None, dialog_type = 
     con, cur = _db._get_connection()
     creation_date = int(time.time())
 
+    if cur.execute("SELECT id FROM dialogs WHERE id IN (SELECT dialog_id FROM dialog_users WHERE user_id IN (?, ?))", [user_id, target_user_id]).fetchone():
+        return False
+
+
     cur.execute("INSERT INTO dialogs (dialog_name, dialog_type, creation_date) VALUES (?, ?, ?)", [dialog_name, dialog_type, creation_date])
     dialog_id = cur.lastrowid
 

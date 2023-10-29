@@ -107,7 +107,9 @@
                 }
             })
             .then(data => {
-                var authorizationCookie = `Authorization=${data.access_token}; path=/`;
+                var date = new Date();
+                date.setTime(date.getTime() + (data.live_time * 60 * 1000));
+                var authorizationCookie = `Authorization=${data.access_token}; expires=${"expires=" + date.toUTCString()}; path=/`;
                 document.cookie = authorizationCookie;
                 location.href = '/dialogs';
             })

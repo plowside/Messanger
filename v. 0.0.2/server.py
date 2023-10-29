@@ -37,6 +37,14 @@ class WebSocketManager:
         if user_id:
             del self.websocket_connections[websocket]
 
+    async def on_disconnect(self, websocket: WebSocket):
+        try:
+            await websocket.close()
+        except: pass
+
+        await self.disconnect(websocket)
+
+
     async def send_message(self, websocket: WebSocket, message: str):
         await websocket.send_text(message)
 
@@ -142,10 +150,11 @@ async def api_find(id: int = Query(None, description="User id"), Authorization: 
     user = await get_current_user(Authorization)
     user_target = get_user(user_id=id)
 
-    dialog = db_create_dialog(user.id, user_target.id, dialog_name = None)#user_target.username if (user_target.first_name is None or user_target.last_name is None) else f'{user_target.first_name if user_target.last_name is None else user_target.last_name}{" " + user_target.last_name if user_target.last_name is None else ""}'
+    dialog_id = db_create_dialog(user.id, user_target.id, dialog_name = None)#user_target.username if (user_target.first_name is None or user_target.last_name is None) else f'{user_target.first_name if user_target.last_name is None else user_target.last_name}{" " + user_target.last_name if user_target.last_name is None else ""}'
+    if not dialog_id:
+        return {'status': False}
 
-    message = {'update':'new_dialog', 'data': {'dialog_id': dialog}}
-
+    message = {'update':'new_dialog', 'data': {'dialog_id': dialog_id}}
     try: await manager.send_message(manager.get_connection(user_target.id), json.dumps(message))
     except Exception as e: print(f'errro: {e}')
 
@@ -155,18 +164,22 @@ async def api_find(id: int = Query(None, description="User id"), Authorization: 
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, Authorization: Annotated[str | None, Cookie()] = None):
-    user = await get_current_user(Authorization)
+    try: user = await get_current_user(Authorization)
+    except Exception as e:
+        await manager.on_disconnect(websocket)
+        raise e 
 
     await manager.connect(websocket, user.id)
-
     try:
         while True:
             data = await websocket.receive_text()
-            print(f'data: {data}')
             if data == '': continue
             elif data == 'ping':
                 await manager.send_message(websocket, 'pong')
                 continue
+
+            print(f'data: {data}')
+
 
             dialog_id = int(data.split(':')[0])
             message_type = data.split(':')[1]
@@ -183,12 +196,14 @@ async def websocket_endpoint(websocket: WebSocket, Authorization: Annotated[str 
     except Exception as e:
         print(f"error on Websocket: {e}")
 
+
 @app.get('/test/{user_id}')
 async def tests(user_id: int):
     connection = manager.get_connection(user_id)
     if connection: await manager.send_message(connection, 'hello my nigga')
     else: return False
     return 'hello my nigga'
+
 
 @app.get('/test')
 async def tests():
@@ -199,6 +214,8 @@ async def get_me(Authorization: Annotated[str | None, Cookie()] = None):
     user = await get_current_user(Authorization)
 
     return {'user_id': user.id, 'username': user.username, 'email': user.email, 'first_name': user.first_name, 'last_name': user.last_name, 'registration_date': user.registration_date}    
+
+
 
 @app.post("/api/forgot")
 async def api_forgot(request_data: Forgot):
@@ -216,6 +233,7 @@ async def api_forgot(request_data: Forgot):
     )
 
     return {"recovery_token": recovery_token}
+
 
 @app.post("/api/reset")
 async def api_forgot(request_data: Reset):
@@ -245,15 +263,13 @@ async def api_forgot(request_data: Reset):
 
         to_return['access_token'] = access_token
         to_return['token_type'] = 'Berear'
+        to_return['live_time'] = ACCESS_TOKEN_EXPIRE_MINUTES
 
     return to_return
 
 
-@app.post("/api/auth", response_model=Token)
-async def api_login(
-    response: Response,
-    request_data: UserLogin
-):
+@app.post("/api/auth")
+async def api_login(response: Response, request_data: UserLogin):
     user = authenticate_user(request_data.username, request_data.password)
     if not user:
         raise HTTPException(
@@ -266,14 +282,11 @@ async def api_login(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "Bearer"}
+    return {"access_token": access_token, "token_type": "Bearer", "live_time": ACCESS_TOKEN_EXPIRE_MINUTES}
 
 
-@app.post("/api/register", response_model=Token)
-async def api_register(
-    response: Response,
-    request_data: UserRegister
-):
+@app.post("/api/register")
+async def api_register(response: Response, request_data: UserRegister):
     user = get_user(username=request_data.username)
     if user:
         raise HTTPException(
@@ -301,7 +314,7 @@ async def api_register(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "Bearer"}
+    return {"access_token": access_token, "token_type": "Bearer", "live_time": ACCESS_TOKEN_EXPIRE_MINUTES}
 
 
 

@@ -748,26 +748,25 @@
 				}
 			}
 
-			var ws = null;
 
+			var ws = null;
 			function create_websocket() {
 				ws = new WebSocket(`ws://${location.host}/ws`)
 
 				ws.onopen = function () {
 					console.log('WebSocket connection opened');
 					
-					// Отправляем "ping" через WebSocket каждые 30 секунд
 					setInterval(() => {
 						if (ws.readyState === WebSocket.OPEN) {
 							ws.send('ping');
 						}
-					}, 60000);
+					}, 10000);
 				};
 
 				ws.onclose = function (event) {
 					console.log('WebSocket connection closed', event);
 
-					setTimeout(create_websocket, 3000);
+					setTimeout(create_websocket, 5000);
 				}
 
 				ws.onmessage = function(event) {
@@ -875,12 +874,20 @@
 
 			loadUserData();
 
-			function send_msg() {
+			function send_msg(text = null) {
+				if (text === null) text = textInput.value
 				try {
-					ws.send(`${chat_profile_details.getAttribute('chat-id')}:message:${textInput.value}`);
+					if (ws.readyState === WebSocket.OPEN) {
+						ws.send(`${chat_profile_details.getAttribute('chat-id')}:message:${text}`);
+					} else
+					{
+						create_websocket();
+						setTimeout(function(){
+							send_msg(text);
+						}, 300);
+					}
 				} catch (error){
-					fetch(`/api/${error}`)
-					console.log('fsd');
+					console.error(error);
 				}
 			}
 
@@ -1150,7 +1157,7 @@
 						return response.json();
 					}).then(data => {
 						if (data.status === false){
-							return alert('pizdec');
+							return alert(`pizdec: ${data}`);
 						}
 						data.messages.forEach(function (e){
 							var chatElement = document.createElement('div');
