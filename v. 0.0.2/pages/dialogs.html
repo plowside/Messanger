@@ -761,7 +761,7 @@
 						if (ws.readyState === WebSocket.OPEN) {
 							ws.send('ping');
 						}
-					}, 30000);
+					}, 60000);
 				};
 
 				ws.onclose = function (event) {
@@ -771,6 +771,7 @@
 				}
 
 				ws.onmessage = function(event) {
+					if (event.data == 'pong') return;
 					var message = JSON.parse(event.data);
 					console.log(message);
 					if (message.update == 'new_message'){
